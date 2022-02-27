@@ -10,13 +10,17 @@ class ProxyAnontypeSpider(scrapy.Spider):
     def parse(self, response):
         unsorted_data = {}
         data_odd = {}
+        # current URL has a table with structure like odd row, even row
+        # so, to read table body particular rows css selector is used
         odd_rows = response.css('table.data tr.odd')
+        # cycle "for" iterates the list of particular row with class 'odd'
         for pos, odd_row in enumerate(odd_rows):
             pos = 2 * pos + 1
             odd_row_ip = odd_row.css('td')[1].css('::text').extract()
             odd_anon_type = odd_row.css('td')[2].css('::text').extract()
             data_odd['ip_address'] = odd_row_ip[0]
             data_odd['port'] = odd_anon_type[0]
+            # data from table add to unsorted data dictionary
             unsorted_data[pos] = data_odd
         even_rows = response.css('table.data tr.even')
         data_even = {}
@@ -28,6 +32,7 @@ class ProxyAnontypeSpider(scrapy.Spider):
             data_odd['port'] = even_anon_type[0]
             unsorted_data[pos] = data_odd
         sorted_data = {}
+        # to sort data positions is used
         for i in range(len(odd_rows) + len(even_rows) + 2):
             if i in unsorted_data.keys():
                 sorted_data[i] = unsorted_data[i]
